@@ -9,7 +9,7 @@
     <em:version>0.1pre</em:version>
     <em:creator>Jim Porter</em:creator>
     <em:contributor></em:contributor>
-    <em:description>foo</em:description>
+    <em:description>Perform common browsing commands via rocker gestures.</em:description>
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!--Firefox-->
