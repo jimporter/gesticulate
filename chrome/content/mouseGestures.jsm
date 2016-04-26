@@ -31,7 +31,6 @@ MouseGestureHandler.prototype = {
   _mouseState: 0,
 
   _performingGesture: false,
-  _suppressNextClick: false,
 
   _wantContextMenu: false,
 
@@ -75,9 +74,12 @@ MouseGestureHandler.prototype = {
 
     if (this._performingGesture) {
       if (event.buttons === 0) {
-        this._window.console.log("gesture exited");
-        this._performingGesture = false;
-        this._suppressNextClick = true;
+        // Delay exiting the gesture so that we can suppress the last click
+        // event generated from this mouseup.
+        this._window.setTimeout(() => {
+          this._window.console.log("gesture exited");
+          this._performingGesture = false;
+        }, 0);
       }
 
       event.preventDefault();
@@ -92,9 +94,8 @@ MouseGestureHandler.prototype = {
     let wantedContextMenu = this._wantContextMenu;
     this._wantContextMenu = false;
 
-    if (this._performingGesture || this._suppressNextClick) {
+    if (this._performingGesture) {
       this._window.console.log("suppressed click");
-      this._suppressNextClick = false;
 
       event.preventDefault();
       event.stopPropagation();
