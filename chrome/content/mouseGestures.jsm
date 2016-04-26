@@ -30,8 +30,12 @@ MouseGestureHandler.prototype = {
   // The current state of the mouse buttons, as a bitmask (see Event.buttons).
   _mouseState: 0,
 
+  // True if we're performing a gesture; this lets us know when to suppress
+  // mouse events.
   _performingGesture: false,
 
+  // True if the browser tried to open a context menu and we want to delay it
+  // until the corresponding click event.
   _wantContextMenu: false,
 
   /**
@@ -54,6 +58,17 @@ MouseGestureHandler.prototype = {
     return platform !== 'Windows_NT';
   },
 
+  /**
+   * Handle the mousedown event. Currently, we consider something to be a rocker
+   * gesture if a single button was pressed before this event, and now two
+   * buttons are pressed.
+   *
+   * Note: This does mean that it's possible to change the "base" of the rocker
+   * gesture (e.g hold RMB, hold LMB ("go back") release RMB, hold RMB ("go
+   * forward"). I'm not convinced this is really a problem, though.
+   *
+   * @param event The event to handle.
+   */
   mousedown: function(event) {
     let oldState = this._mouseState;
     this._window.console.log("mousedown", oldState, event.buttons, event);
@@ -68,6 +83,12 @@ MouseGestureHandler.prototype = {
     }
   },
 
+  /**
+   * Handle the mouseup event. Once no buttons are being pressed, we consider
+   * the rocker gesture to be over.
+   *
+   * @param event The event to handle.
+   */
   mouseup: function(event) {
     this._window.console.log("mouseup", event);
     this._mouseState = event.buttons;
@@ -87,6 +108,14 @@ MouseGestureHandler.prototype = {
     }
   },
 
+  /**
+   * Handle the click event. This is necessary for two reasons: 1) to suppress
+   * clicks that happened during a gesture, and 2) to synthesize a contextmenu
+   * event for Linux/OS X(?), since they pop up their context menus on
+   * mousedown, which disrupts the UI of rocker gestures.
+   *
+   * @param event The event to handle.
+   */
   click: function(event) {
     if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE)
       return;
@@ -97,6 +126,7 @@ MouseGestureHandler.prototype = {
     if (this._performingGesture) {
       this._window.console.log("suppressed click");
 
+      // On Windows, this should suppress the contextmenu event as well.
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -112,6 +142,13 @@ MouseGestureHandler.prototype = {
     }
   },
 
+  /**
+   * Handle the contextmenu event. This is needed on Linux/OS X(?), since they
+   * pop up their context menus on mousedown, which disrupts the UI of rocker
+   * gestures.
+   *
+   * @param event The event to handle.
+   */
   contextmenu: function(event) {
     if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE)
       return;
@@ -128,6 +165,12 @@ MouseGestureHandler.prototype = {
     this._window.console.log("contextmenu", event);
   },
 
+  /**
+   * Perform a gesture. XXX: Allow configuring these actions one day.
+   *
+   * @param oldState The starting state of the mouse buttons, as a bitmask.
+   * @param newState The current state of the mouse buttons, as a bitmask.
+   */
   performGesture: function(oldState, newState) {
     this._window.console.log("*** GESTURE ***", oldState, newState);
 
