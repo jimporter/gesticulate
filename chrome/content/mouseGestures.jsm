@@ -11,9 +11,37 @@ const platform = Cc["@mozilla.org/system-info;1"]
                    .getService(Ci.nsIPropertyBag2).getProperty("name");
 
 /**
+ * Determine if an integer is a power of 2.
+ *
+ * @param x A non-negative integer
+ * @return true if x is a power of 2, false otherwise
+ */
+function isPow2(x) {
+  return x !== 0 && (x & (x - 1)) === 0;
+}
+
+/**
+ * Map a button bitmask containing only one set bit to a button index
+ * (effectively, Event.buttons => Event.button).
+ *
+ * @param x A button bitmask
+ * @return The mapp button index
+ */
+function mapButtons(x) {
+  switch (x) {
+  case 1:  return 0;
+  case 2:  return 2;
+  case 4:  return 1;
+  case 8:  return 3;
+  case 16: return 4;
+  default: throw new Error("unexpected buttons mask");
+  }
+}
+
+/**
  * Create a new mouse gesture handler.
  *
- * @param window The window to handle gestures for.
+ * @param window The window to handle gestures for
  */
 function MouseGestureHandler(window) {
   this._window = window;
@@ -67,16 +95,17 @@ MouseGestureHandler.prototype = {
    * gesture (e.g hold RMB, hold LMB ("go back") release RMB, hold RMB ("go
    * forward")). I'm not convinced this is really a problem, though.
    *
-   * @param event The event to handle.
+   * @param event The event to handle
    */
   mousedown: function(event) {
     let oldState = this._mouseState;
-    this._window.console.log("mousedown", oldState, event.buttons, event);
     this._mouseState = event.buttons;
+    this._window.console.log("mousedown", oldState, this._mouseState, event);
 
-    if (oldState === 1 || oldState === 2 || oldState === 4) {
+    if (isPow2(oldState)) {
+      let diff = this._mouseState - oldState;
       this._performingGesture = true;
-      this.performGesture(oldState, event.buttons);
+      this.performGesture(mapButtons(oldState), mapButtons(diff));
 
       event.preventDefault();
       event.stopPropagation();
@@ -87,7 +116,7 @@ MouseGestureHandler.prototype = {
    * Handle the mouseup event. Once no buttons are being pressed, we consider
    * the rocker gesture to be over.
    *
-   * @param event The event to handle.
+   * @param event The event to handle
    */
   mouseup: function(event) {
     this._window.console.log("mouseup", event);
@@ -114,7 +143,7 @@ MouseGestureHandler.prototype = {
    * event for Linux/OS X(?), since they pop up their context menus on
    * mousedown, which disrupts the UI of rocker gestures.
    *
-   * @param event The event to handle.
+   * @param event The event to handle
    */
   click: function(event) {
     if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE)
@@ -147,7 +176,7 @@ MouseGestureHandler.prototype = {
    * pop up their context menus on mousedown, which disrupts the UI of rocker
    * gestures.
    *
-   * @param event The event to handle.
+   * @param event The event to handle
    */
   contextmenu: function(event) {
     if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE)
@@ -168,19 +197,19 @@ MouseGestureHandler.prototype = {
   /**
    * Perform a gesture. XXX: Allow configuring these actions one day.
    *
-   * @param oldState The starting state of the mouse buttons, as a bitmask.
-   * @param newState The current state of the mouse buttons, as a bitmask.
+   * @param first The first button that was pressed
+   * @param second The second button that was pressed
    */
-  performGesture: function(oldState, newState) {
-    this._window.console.log("*** GESTURE ***", oldState, newState);
+  performGesture: function(first, second) {
+    this._window.console.log("*** GESTURE ***", first, second);
 
-    if (oldState === 2 && newState === 3)
+    if (first === 2 && second === 0)
       this._window.BrowserBack();
-    else if (oldState === 1 && newState === 3)
+    else if (first === 0 && second === 2)
       this._window.BrowserForward();
-    else if (oldState === 4 && newState === 5)
+    else if (first === 1 && second === 0)
       this._window.gBrowser.tabContainer.advanceSelectedTab(-1, true);
-    else if (oldState === 4 && newState === 6)
+    else if (first === 1 && second === 2)
       this._window.gBrowser.tabContainer.advanceSelectedTab(1, true);
   }
 };
