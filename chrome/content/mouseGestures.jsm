@@ -107,8 +107,8 @@ MouseGestureHandler.prototype = {
 
     if (isPow2(oldState)) {
       let diff = this._mouseState - oldState;
-      this._performingGesture = true;
       this.performGesture(mapButtons(oldState), mapButtons(diff));
+      this._performingGesture = true;
 
       event.preventDefault();
       event.stopPropagation();
