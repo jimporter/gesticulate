@@ -155,7 +155,6 @@ MouseGestureHandler.prototype = {
     if (this._performingGesture) {
       this._window.console.log("suppressed click");
 
-      // On Windows, this should suppress the contextmenu event as well.
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -182,9 +181,10 @@ MouseGestureHandler.prototype = {
     if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE)
       return;
 
-    if (this._delayContextMenu) {
-      this._window.console.log("suppressed contextmenu - too early!");
-      this._wantContextMenu = true;
+    if (this._performingGesture || this._delayContextMenu) {
+      this._window.console.log("suppressed contextmenu");
+      if (this._delayContextMenu)
+        this._wantContextMenu = true;
 
       event.preventDefault();
       event.stopPropagation();
