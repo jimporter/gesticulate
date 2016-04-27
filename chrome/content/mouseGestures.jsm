@@ -98,6 +98,9 @@ MouseGestureHandler.prototype = {
    * @param event The event to handle
    */
   mousedown: function(event) {
+    if (!event.isTrusted)
+      return;
+
     let oldState = this._mouseState;
     this._mouseState = event.buttons;
     this._window.console.log("mousedown", oldState, this._mouseState, event);
@@ -119,6 +122,9 @@ MouseGestureHandler.prototype = {
    * @param event The event to handle
    */
   mouseup: function(event) {
+    if (!event.isTrusted)
+      return;
+
     this._window.console.log("mouseup", event);
     this._mouseState = event.buttons;
 
@@ -146,7 +152,8 @@ MouseGestureHandler.prototype = {
    * @param event The event to handle
    */
   click: function(event) {
-    if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE)
+    if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE ||
+        !event.isTrusted)
       return;
 
     let wantedContextMenu = this._wantContextMenu;
@@ -178,7 +185,8 @@ MouseGestureHandler.prototype = {
    * @param event The event to handle
    */
   contextmenu: function(event) {
-    if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE)
+    if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE ||
+        !event.isTrusted)
       return;
 
     if (this._performingGesture || this._delayContextMenu) {
