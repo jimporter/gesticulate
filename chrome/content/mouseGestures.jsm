@@ -65,7 +65,7 @@ MouseGestureHandler.prototype = {
    *
    * Note: This does mean that it's possible to change the "base" of the rocker
    * gesture (e.g hold RMB, hold LMB ("go back") release RMB, hold RMB ("go
-   * forward"). I'm not convinced this is really a problem, though.
+   * forward")). I'm not convinced this is really a problem, though.
    *
    * @param event The event to handle.
    */
