@@ -6,6 +6,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
+Cu.import("resource://gre/modules/Services.jsm")
+
 function setupWindow(window) {
   Cu.import("chrome://gesticulate/content/mouseGestures.jsm");
 
@@ -22,6 +24,13 @@ var injector;
 
 function startup(data, reason) {
   Cu.import("chrome://gesticulate/content/windowUtils.jsm");
+  Cu.import("chrome://gesticulate/content/defaultPrefs.jsm");
+
+  // Load the default prefs.
+  Services.scriptloader.loadSubScript(
+    "chrome://gesticulate/content/prefs.js", {pref: setDefaultPref}
+  );
+
   injector = new WindowInjector("navigator:browser", setupWindow,
                                 cleanupWindow);
   injector.start();

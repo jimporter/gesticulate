@@ -6,6 +6,9 @@ var EXPORTED_SYMBOLS = ["MouseGestureHandler"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu.import("chrome://gesticulate/content/log.jsm");
 
 const platform = Cc["@mozilla.org/system-info;1"]
                    .getService(Ci.nsIPropertyBag2).getProperty("name");
@@ -103,7 +106,7 @@ MouseGestureHandler.prototype = {
 
     let oldState = this._mouseState;
     this._mouseState = event.buttons;
-    this._window.console.log("mousedown", oldState, this._mouseState, event);
+    debug(this._window, "mousedown", oldState, this._mouseState, event);
 
     if (isPow2(oldState)) {
       let diff = this._mouseState - oldState;
@@ -125,7 +128,7 @@ MouseGestureHandler.prototype = {
     if (!event.isTrusted)
       return;
 
-    this._window.console.log("mouseup", event);
+    debug(this._window, "mouseup", event);
     this._mouseState = event.buttons;
 
     if (this._performingGesture) {
@@ -133,7 +136,7 @@ MouseGestureHandler.prototype = {
         // Delay exiting the gesture so that we can suppress the last click
         // event generated from this mouseup.
         this._window.setTimeout(() => {
-          this._window.console.log("gesture exited");
+          debug(this._window, "gesture exited");
           this._performingGesture = false;
         }, 0);
       }
@@ -160,14 +163,14 @@ MouseGestureHandler.prototype = {
     this._wantContextMenu = false;
 
     if (this._performingGesture) {
-      this._window.console.log("suppressed click");
+      debug(this._window, "suppressed click");
 
       event.preventDefault();
       event.stopPropagation();
       return;
     }
 
-    this._window.console.log("click", event);
+    debug(this._window, "click", event);
     if (wantedContextMenu) {
       // This doesn't trigger our contextmenu handler below, so we don't need to
       // worry about it being supressed.
@@ -190,7 +193,7 @@ MouseGestureHandler.prototype = {
       return;
 
     if (this._performingGesture || this._delayContextMenu) {
-      this._window.console.log("suppressed contextmenu");
+      debug(this._window, "suppressed contextmenu");
       if (this._delayContextMenu)
         this._wantContextMenu = true;
 
@@ -199,7 +202,7 @@ MouseGestureHandler.prototype = {
       return;
     }
 
-    this._window.console.log("contextmenu", event);
+    debug(this._window, "contextmenu", event);
   },
 
   /**
@@ -209,7 +212,7 @@ MouseGestureHandler.prototype = {
    * @param second The second button that was pressed
    */
   performGesture: function(first, second) {
-    this._window.console.log("*** GESTURE ***", first, second);
+    debug(this._window, "*** GESTURE ***", first, second);
 
     if (first === 2 && second === 0)
       this._window.BrowserBack();
