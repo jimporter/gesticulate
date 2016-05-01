@@ -60,22 +60,6 @@ function toButtons(x) {
 }
 
 /**
- * Zoom an <img> element by a particular factor.
- *
- * @param img The image to zoom
- * @param factor The factor to zoom by
- */
-function zoomImage(img, factor) {
-  if (img.tagName !== "IMG")
-    return;
-
-  let width = parseFloat(img.width);
-  let height = parseFloat(img.height);
-  img.width = width * factor;
-  img.height = height * factor;
-}
-
-/**
  * Create a new mouse gesture observer.
  *
  * @param window The window to observe gestures for
@@ -84,8 +68,7 @@ function MouseGestureObserver(window) {
   this._window = window;
 
   this._bound = new Map();
-  for (var i of ["mousedown", "mouseup", "click", "contextmenu", "wheel",
-                 "gesture"]) {
+  for (var i of ["mousedown", "mouseup", "click", "contextmenu", "wheel"]) {
     var bound = this[i].bind(this);
     this._bound.set(i, bound);
     this._window.addEventListener(i, bound, true);
@@ -245,6 +228,12 @@ MouseGestureObserver.prototype = {
     debug(this._window, "contextmenu", event);
   },
 
+  /**
+   * Handle the wheel event. If the middle mouse button is being pressed, this
+   * is a wheel gesture.
+   *
+   * @param event The event to handle
+   */
   wheel: function(event) {
     if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE ||
         !event.isTrusted)
@@ -271,27 +260,5 @@ MouseGestureObserver.prototype = {
     }
 
     debug(this._window, "wheel", event);
-  },
-
-  /**
-   * Perform a gesture. XXX: Allow configuring these actions one day.
-   *
-   * @param event The event to handle
-   */
-  gesture: function(event) {
-    debug(this._window, "*** GESTURE %s ***", event.detail.id);
-
-    if (event.detail.id === "rocker:2,0")
-      this._window.BrowserBack();
-    else if (event.detail.id === "rocker:0,2")
-      this._window.BrowserForward();
-    else if (event.detail.id === "rocker:1,0")
-      this._window.gBrowser.tabContainer.advanceSelectedTab(-1, true);
-    else if (event.detail.id === "rocker:1,2")
-      this._window.gBrowser.tabContainer.advanceSelectedTab(1, true);
-    else if (event.detail.id === "wheel:-1")
-      zoomImage(event.target, 2);
-    else if (event.detail.id === "wheel:1")
-      zoomImage(event.target, 1/2);
   },
 };

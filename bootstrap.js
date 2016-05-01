@@ -9,15 +9,18 @@ const Cu = Components.utils;
 Cu.import("resource://gre/modules/Services.jsm")
 
 function setupWindow(window) {
+  Cu.import("chrome://gesticulate/content/gestures.jsm");
   Cu.import("chrome://gesticulate/content/mouseGestures.jsm");
 
   return {
-    gestures: new MouseGestureObserver(window)
+    gestures: new GestureHandler(window),
+    mouseGestures: new MouseGestureObserver(window),
   };
 }
 
 function cleanupWindow(window, state) {
   state.gestures.cleanup();
+  state.mouseGestures.cleanup();
 }
 
 var injector;
