@@ -4,8 +4,7 @@
 
 var EXPORTED_SYMBOLS = ["WindowInjector"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 function WindowInjector(windowType, installCallback, uninstallCallback) {
   this.windowType = windowType;

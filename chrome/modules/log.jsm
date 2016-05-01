@@ -4,9 +4,7 @@
 
 var EXPORTED_SYMBOLS = ["debug", "warn", "error"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://gre/modules/Services.jsm");
 
