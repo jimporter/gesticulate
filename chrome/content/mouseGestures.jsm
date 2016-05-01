@@ -60,6 +60,22 @@ function toButtons(x) {
 }
 
 /**
+ * Zoom an <img> element by a particular factor.
+ *
+ * @param img The image to zoom
+ * @param factor The factor to zoom by
+ */
+function zoomImage(img, factor) {
+  if (img.tagName !== "IMG")
+    return;
+
+  let width = parseFloat(img.width);
+  let height = parseFloat(img.height);
+  img.width = width * factor;
+  img.height = height * factor;
+}
+
+/**
  * Create a new mouse gesture handler.
  *
  * @param window The window to handle gestures for
@@ -68,7 +84,7 @@ function MouseGestureHandler(window) {
   this._window = window;
 
   this._bound = new Map();
-  for (var i of ["mousedown", "mouseup", "click", "contextmenu",
+  for (var i of ["mousedown", "mouseup", "click", "contextmenu", "wheel",
                  "gesture"]) {
     var bound = this[i].bind(this);
     this._bound.set(i, bound);
@@ -229,6 +245,34 @@ MouseGestureHandler.prototype = {
     debug(this._window, "contextmenu", event);
   },
 
+  wheel: function(event) {
+    if (event.mozInputSource !== Ci.nsIDOMMouseEvent.MOZ_SOURCE_MOUSE ||
+        !event.isTrusted)
+      return;
+
+    if (event.buttons === 0) {
+      // Firefox swallows pending events during page unloads; make sure we're
+      // in the proper state if we exited the gesture.
+      this._performingGesture = false;
+    } else if (event.buttons === 4) {
+      let dir = event.deltaY > 0 ? 1 : -1;
+      event.target.dispatchEvent(new this._window.CustomEvent(
+        "gesture", { detail: {
+          subtype: "wheel",
+          direction: dir,
+          id: "wheel:" + dir
+        }}
+      ));
+      this._performingGesture = true;
+
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    debug(this._window, "wheel", event);
+  },
+
   /**
    * Perform a gesture. XXX: Allow configuring these actions one day.
    *
@@ -245,5 +289,9 @@ MouseGestureHandler.prototype = {
       this._window.gBrowser.tabContainer.advanceSelectedTab(-1, true);
     else if (event.detail.id === "rocker:1,2")
       this._window.gBrowser.tabContainer.advanceSelectedTab(1, true);
+    else if (event.detail.id === "wheel:-1")
+      zoomImage(event.target, 2);
+    else if (event.detail.id === "wheel:1")
+      zoomImage(event.target, 1/2);
   },
 };
