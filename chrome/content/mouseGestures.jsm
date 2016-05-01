@@ -68,7 +68,8 @@ function MouseGestureHandler(window) {
   this._window = window;
 
   this._bound = new Map();
-  for (var i of ["mousedown", "mouseup", "click", "contextmenu"]) {
+  for (var i of ["mousedown", "mouseup", "click", "contextmenu",
+                 "gesture"]) {
     var bound = this[i].bind(this);
     this._bound.set(i, bound);
     this._window.addEventListener(i, bound, true);
@@ -101,7 +102,7 @@ MouseGestureHandler.prototype = {
    * XXX: Allow this to be set by a pref.
    */
   get _delayContextMenu() {
-    return platform !== 'Windows_NT';
+    return platform !== "Windows_NT";
   },
 
   /**
@@ -127,7 +128,14 @@ MouseGestureHandler.prototype = {
       // in the proper state if we exited the gesture.
       this._performingGesture = false;
     } else if (isPow2(oldState)) {
-      this.performGesture(fromButtons(oldState), event.button);
+      event.target.dispatchEvent(new this._window.CustomEvent(
+        "gesture", { detail: {
+          subtype: "rocker",
+          firstButton: fromButtons(oldState),
+          secondButton: event.button,
+          id: "rocker:" + fromButtons(oldState) + "," + event.button
+        }}
+      ));
       this._performingGesture = true;
 
       event.preventDefault();
@@ -224,19 +232,18 @@ MouseGestureHandler.prototype = {
   /**
    * Perform a gesture. XXX: Allow configuring these actions one day.
    *
-   * @param first The first button that was pressed
-   * @param second The second button that was pressed
+   * @param event The event to handle
    */
-  performGesture: function(first, second) {
-    debug(this._window, "*** GESTURE ***", first, second);
+  gesture: function(event) {
+    debug(this._window, "*** GESTURE %s ***", event.detail.id);
 
-    if (first === 2 && second === 0)
+    if (event.detail.id === "rocker:2,0")
       this._window.BrowserBack();
-    else if (first === 0 && second === 2)
+    else if (event.detail.id === "rocker:0,2")
       this._window.BrowserForward();
-    else if (first === 1 && second === 0)
+    else if (event.detail.id === "rocker:1,0")
       this._window.gBrowser.tabContainer.advanceSelectedTab(-1, true);
-    else if (first === 1 && second === 2)
+    else if (event.detail.id === "rocker:1,2")
       this._window.gBrowser.tabContainer.advanceSelectedTab(1, true);
-  }
+  },
 };
