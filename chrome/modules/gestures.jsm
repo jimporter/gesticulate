@@ -8,8 +8,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-Cu.import("chrome://gesticulate/content/functions.jsm");
-Cu.import("chrome://gesticulate/content/log.jsm");
+Cu.import("resource://gesticulate/functions.jsm");
+Cu.import("resource://gesticulate/log.jsm");
 
 /**
  * Create a new gesture handler.

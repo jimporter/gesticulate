@@ -8,20 +8,11 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-Cu.import("chrome://gesticulate/content/log.jsm");
+Cu.import("resource://gre/modules/Services.jsm")
+Cu.import("resource://gesticulate/log.jsm");
 
 const platform = Cc["@mozilla.org/system-info;1"]
                    .getService(Ci.nsIPropertyBag2).getProperty("name");
-
-/**
- * Determine if an integer is a power of 2.
- *
- * @param x A non-negative integer
- * @return true if x is a power of 2, false otherwise
- */
-function isPow2(x) {
-  return x !== 0 && (x & (x - 1)) === 0;
-}
 
 /**
  * Map a button bitmask containing only one set bit to a button index
@@ -37,7 +28,7 @@ function fromButtons(x) {
   case 4:  return 1;
   case 8:  return 3;
   case 16: return 4;
-  default: throw new Error("unexpected buttons mask");
+  default: return undefined;
   }
 }
 
@@ -50,12 +41,12 @@ function fromButtons(x) {
  */
 function toButtons(x) {
   switch (x) {
-  case 0: return 1;
-  case 1: return 4;
-  case 2: return 2;
-  case 3: return 8;
-  case 4: return 16;
-  default: throw new Error("unexpected button");
+  case 0:  return 1;
+  case 1:  return 4;
+  case 2:  return 2;
+  case 3:  return 8;
+  case 4:  return 16;
+  default: return undefined;
   }
 }
 
@@ -97,11 +88,27 @@ MouseGestureObserver.prototype = {
    * Determine if the context menu's popup should be delayed. This is necessary
    * on non-Windows platforms because it pops up on mousedown, which can
    * visually interrupt a rocker gesture.
-   *
-   * XXX: Allow this to be set by a pref.
    */
   get _delayContextMenu() {
-    return platform !== "Windows_NT";
+    return platform !== "Windows_NT" && Services.prefs.getBoolPref(
+      "extensions.gesticulate.delay_context_menu"
+    );
+  },
+
+  /**
+   * Get the button to use for mouse gestures.
+   */
+  get _gestureButton() {
+    return Services.prefs.getIntPref("extensions.gesticulate.gesture_button");
+  },
+
+  /**
+   * Reset the internal state to the default. This is necessary because Firefox
+   * swallows pending events during page unloads
+   */
+  _resetState: function() {
+    this._performingGesture = false;
+    this._wantContextMenu = false;
   },
 
   /**
@@ -125,8 +132,8 @@ MouseGestureObserver.prototype = {
     if (oldState === 0) {
       // Firefox swallows pending events during page unloads; make sure we're
       // in the proper state if we exited the gesture.
-      this._performingGesture = false;
-    } else if (isPow2(oldState)) {
+      this._resetState();
+    } else if (fromButtons(oldState) !== undefined) {
       event.target.dispatchEvent(new this._window.CustomEvent(
         "gesture", { detail: {
           subtype: "rocker",
@@ -242,8 +249,8 @@ MouseGestureObserver.prototype = {
     if (event.buttons === 0) {
       // Firefox swallows pending events during page unloads; make sure we're
       // in the proper state if we exited the gesture.
-      this._performingGesture = false;
-    } else if (event.buttons === 4) {
+      this._resetState();
+    } else if (fromButtons(event.buttons) === this._gestureButton) {
       let dir = event.deltaY > 0 ? 1 : -1;
       event.target.dispatchEvent(new this._window.CustomEvent(
         "gesture", { detail: {

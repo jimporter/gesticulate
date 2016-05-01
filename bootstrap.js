@@ -9,8 +9,8 @@ const Cu = Components.utils;
 Cu.import("resource://gre/modules/Services.jsm")
 
 function setupWindow(window) {
-  Cu.import("chrome://gesticulate/content/gestures.jsm");
-  Cu.import("chrome://gesticulate/content/mouseGestures.jsm");
+  Cu.import("resource://gesticulate/gestures.jsm");
+  Cu.import("resource://gesticulate/mouseGestures.jsm");
 
   return {
     gestures: new GestureHandler(window),
@@ -26,8 +26,8 @@ function cleanupWindow(window, state) {
 var injector;
 
 function startup(data, reason) {
-  Cu.import("chrome://gesticulate/content/windowUtils.jsm");
-  Cu.import("chrome://gesticulate/content/defaultPrefs.jsm");
+  Cu.import("resource://gesticulate/windowUtils.jsm");
+  Cu.import("resource://gesticulate/defaultPrefs.jsm");
 
   // Load the default prefs.
   Services.scriptloader.loadSubScript(
