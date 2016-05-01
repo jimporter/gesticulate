@@ -28,9 +28,9 @@ function isPow2(x) {
  * (effectively, Event.buttons => Event.button).
  *
  * @param x A button bitmask
- * @return The mapp button index
+ * @return The mapped button index
  */
-function mapButtons(x) {
+function fromButtons(x) {
   switch (x) {
   case 1:  return 0;
   case 2:  return 2;
@@ -38,6 +38,24 @@ function mapButtons(x) {
   case 8:  return 3;
   case 16: return 4;
   default: throw new Error("unexpected buttons mask");
+  }
+}
+
+/**
+ * Map a button index to a button bitmask (effectively, Event.button =>
+ * Event.buttons).
+ *
+ * @param x A button index
+ * @return The mapped button bitmask
+ */
+function toButtons(x) {
+  switch (x) {
+  case 0: return 1;
+  case 1: return 4;
+  case 2: return 2;
+  case 3: return 8;
+  case 4: return 16;
+  default: throw new Error("unexpected button");
   }
 }
 
@@ -53,14 +71,11 @@ function MouseGestureHandler(window) {
   for (var i of ["mousedown", "mouseup", "click", "contextmenu"]) {
     var bound = this[i].bind(this);
     this._bound.set(i, bound);
-    this._window.gBrowser.addEventListener(i, bound, true);
+    this._window.addEventListener(i, bound, true);
   }
 }
 
 MouseGestureHandler.prototype = {
-  // The current state of the mouse buttons, as a bitmask (see Event.buttons).
-  _mouseState: 0,
-
   // True if we're performing a gesture; this lets us know when to suppress
   // mouse events.
   _performingGesture: false,
@@ -74,7 +89,7 @@ MouseGestureHandler.prototype = {
    */
   cleanup: function() {
     for (var [k, v] of this._bound.entries()) {
-      this._window.gBrowser.removeEventListener(k, v, true);
+      this._window.removeEventListener(k, v, true);
     }
   },
 
@@ -104,13 +119,15 @@ MouseGestureHandler.prototype = {
     if (!event.isTrusted)
       return;
 
-    let oldState = this._mouseState;
-    this._mouseState = event.buttons;
-    debug(this._window, "mousedown", oldState, this._mouseState, event);
+    let oldState = event.buttons - toButtons(event.button);
+    debug(this._window, "mousedown", oldState, event.buttons, event);
 
-    if (isPow2(oldState)) {
-      let diff = this._mouseState - oldState;
-      this.performGesture(mapButtons(oldState), mapButtons(diff));
+    if (oldState === 0) {
+      // Firefox swallows pending events during page unloads; make sure we're
+      // in the proper state if we exited the gesture.
+      this._performingGesture = false;
+    } else if (isPow2(oldState)) {
+      this.performGesture(fromButtons(oldState), event.button);
       this._performingGesture = true;
 
       event.preventDefault();
@@ -129,7 +146,6 @@ MouseGestureHandler.prototype = {
       return;
 
     debug(this._window, "mouseup", event);
-    this._mouseState = event.buttons;
 
     if (this._performingGesture) {
       if (event.buttons === 0) {
