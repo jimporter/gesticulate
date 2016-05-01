@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var EXPORTED_SYMBOLS = ["MouseGestureHandler"];
+var EXPORTED_SYMBOLS = ["MouseGestureObserver"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -76,11 +76,11 @@ function zoomImage(img, factor) {
 }
 
 /**
- * Create a new mouse gesture handler.
+ * Create a new mouse gesture observer.
  *
- * @param window The window to handle gestures for
+ * @param window The window to observe gestures for
  */
-function MouseGestureHandler(window) {
+function MouseGestureObserver(window) {
   this._window = window;
 
   this._bound = new Map();
@@ -92,7 +92,7 @@ function MouseGestureHandler(window) {
   }
 }
 
-MouseGestureHandler.prototype = {
+MouseGestureObserver.prototype = {
   // True if we're performing a gesture; this lets us know when to suppress
   // mouse events.
   _performingGesture: false,
@@ -102,7 +102,7 @@ MouseGestureHandler.prototype = {
   _wantContextMenu: false,
 
   /**
-   * Clean up the mouse gesture handler, detaching all event listeners.
+   * Clean up the mouse gesture observer, detaching all event listeners.
    */
   cleanup: function() {
     for (var [k, v] of this._bound.entries()) {

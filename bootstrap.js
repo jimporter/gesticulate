@@ -12,7 +12,7 @@ function setupWindow(window) {
   Cu.import("chrome://gesticulate/content/mouseGestures.jsm");
 
   return {
-    gestures: new MouseGestureHandler(window)
+    gestures: new MouseGestureObserver(window)
   };
 }
 
