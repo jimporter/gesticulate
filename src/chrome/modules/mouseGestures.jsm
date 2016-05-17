@@ -101,12 +101,19 @@ MouseGestureObserver.prototype = {
   },
 
   /**
-   * Reset the internal state to the default. This is necessary because Firefox
-   * swallows pending events during page unloads
+   * Reset the internal state to the default if we were performing a gesture.
+   * This is necessary because Firefox swallows pending events during page
+   * unloads.
    */
   _resetState: function() {
-    this._performingGesture = false;
-    this._wantContextMenu = false;
+    // We only reset when we know we were already performing a gesture because
+    // recent Firefox builds on Linux fire the contextmenu event *before* the
+    // mousedown event. If we don't do this, we'll forget that we had a context
+    // menu queued up.
+    if (this._performingGesture) {
+      this._performingGesture = false;
+      this._wantContextMenu = false;
+    }
   },
 
   /**
