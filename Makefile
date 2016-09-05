@@ -1,9 +1,9 @@
 ADDON_NAME=gesticulate
-ADDON_VERSION=0.2
+ADDON_VERSION=0.3pre
 
 .PHONY: clean
 clean:
-	git clean -Xn .
+	git clean -X .
 
 .PHONY: package
 package: clean
