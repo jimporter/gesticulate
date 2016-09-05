@@ -131,8 +131,10 @@ MouseGestureObserver.prototype = {
     if (!event.isTrusted)
       return;
 
-    let oldState = event.buttons - toButtons(event.button);
-    debug(this._window, "mousedown", oldState, event.buttons, event);
+    let buttons = event.buttons;
+    let oldState = buttons - toButtons(event.button);
+    debug(this._window, "mousedown", oldState, event.buttons, buttons,
+          toButtons(event.button), event);
 
     if (oldState === 0) {
       // Firefox swallows pending events during page unloads; make sure we're
