@@ -2,16 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var EXPORTED_SYMBOLS = ["MouseGestureObserver"];
-
-const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-
-Cu.import("resource://gre/modules/Services.jsm")
-Cu.import("resource://gesticulate/log.jsm");
-
-const platform = Cc["@mozilla.org/system-info;1"]
-                   .getService(Ci.nsIPropertyBag2).getProperty("name");
-
 /**
  * Map a button bitmask containing only one set bit to a button index
  * (effectively, Event.buttons => Event.button).
@@ -88,16 +78,19 @@ MouseGestureObserver.prototype = {
    * visually interrupt a rocker gesture.
    */
   get _delayContextMenu() {
-    return platform !== "Windows_NT" && Services.prefs.getBoolPref(
-      "extensions.gesticulate.delay_context_menu"
-    );
+    // XXX: Support a pref for delaying the context menu (it used to be
+    // "extensions.gesticulate.delay_context_menu". Also, don't delay on
+    // Windows; it already works fine there.
+    return false;
   },
 
   /**
    * Get the button to use for mouse gestures.
    */
   get _gestureButton() {
-    return Services.prefs.getIntPref("extensions.gesticulate.gesture_button");
+    // XXX: Support a pref for setting the gesture button (it used to be
+    // "extensions.gesticulate.gesture_button").
+    return 2;
   },
 
   /**
@@ -211,6 +204,8 @@ MouseGestureObserver.prototype = {
     if (wantedContextMenu) {
       // This doesn't trigger our contextmenu handler below, so we don't need to
       // worry about it being supressed.
+      // XXX: This is currently broken due to multi-process. Figure out what to
+      // do here instead...
       event.target.dispatchEvent(new this._window.MouseEvent(
         "contextmenu", event
       ));

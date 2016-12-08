@@ -2,15 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var EXPORTED_SYMBOLS = ["debug", "warn", "error"];
-
-const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-
-Cu.import("resource://gre/modules/Services.jsm");
-
 function debug(window, ...args) {
-  if (Services.prefs.getBoolPref("extensions.gesticulate.debug"))
-    window.console.log(...args);
+  // XXX: Add a pref for toggling debug logging.
+  window.console.log(...args);
 }
 
 function warn(window, ...args) {
