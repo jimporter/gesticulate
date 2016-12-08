@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "Gesticulate",
+  "version": "0.2",
+
+  "description": "Perform common browsing commands via rocker gestures.",
+
+  "applications": {
+    "gecko": {
+      "id": "gesticulate@squib.org"
+    }
+  },
+
+  "permissions": [
+    "<all_urls>",
+    "activeTab",
+    "tabs"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["log.js", "functions.js", "gestures.js", "mouseGestures.js",
+             "main.js"]
+    }
+  ],
+
+  "background": {
+    "scripts": ["background.js"]
+  }
+}

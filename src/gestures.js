@@ -2,13 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var EXPORTED_SYMBOLS = ["GestureHandler"];
-
-const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-
-Cu.import("resource://gesticulate/functions.jsm");
-Cu.import("resource://gesticulate/log.jsm");
-
 /**
  * Create a new gesture handler.
  *

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var EXPORTED_SYMBOLS = ["Functions"];
-
 /**
  * This is a list of useful functions for gestures to perform. All public
  * functions take the window the event occurred in and the event itself.
@@ -13,28 +11,28 @@ const Functions = {
    * Go back one page.
    */
   navigateBack: function(window, event) {
-    window.BrowserBack();
+    window.history.back();
   },
 
   /**
    * Go forward one page.
    */
   navigateForward: function(window, event) {
-    window.BrowserForward();
+    window.history.forward();
   },
 
   /**
    * Go to the previous tab, cycling around if we're at the beginning.
    */
   previousTab: function(window, event) {
-    window.gBrowser.tabContainer.advanceSelectedTab(-1, true);
+    browser.runtime.sendMessage({command: "cycleTab", offset: -1});
   },
 
   /**
    * Go to the next tab, cycling around if we're at the end.
    */
   nextTab: function(window, event) {
-    window.gBrowser.tabContainer.advanceSelectedTab(1, true);
+    browser.runtime.sendMessage({command: "cycleTab", offset: 1});
   },
 
   /**
