@@ -192,7 +192,7 @@ MouseGestureObserver.prototype = {
    * @param event The event to handle
    */
   click: function(event) {
-    if (event.mozInputSource !== MouseEvent.MOZ_SOURCE_MOUSE ||
+    if (event.mozInputSource !== this._window.MouseEvent.MOZ_SOURCE_MOUSE ||
         !event.isTrusted)
       return;
 
@@ -225,7 +225,7 @@ MouseGestureObserver.prototype = {
    * @param event The event to handle
    */
   contextmenu: function(event) {
-    if (event.mozInputSource !== MouseEvent.MOZ_SOURCE_MOUSE ||
+    if (event.mozInputSource !== this._window.MouseEvent.MOZ_SOURCE_MOUSE ||
         !event.isTrusted)
       return;
 
@@ -249,7 +249,7 @@ MouseGestureObserver.prototype = {
    * @param event The event to handle
    */
   wheel: function(event) {
-    if (event.mozInputSource !== MouseEvent.MOZ_SOURCE_MOUSE ||
+    if (event.mozInputSource !== this._window.MouseEvent.MOZ_SOURCE_MOUSE ||
         !event.isTrusted)
       return;
 
