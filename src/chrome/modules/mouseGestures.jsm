@@ -200,7 +200,7 @@ MouseGestureObserver.prototype = {
     this._wantContextMenu = false;
 
     if (this._performingGesture) {
-      debug(this._window, "suppressed click");
+      debug(this._window, "suppressed click", event);
 
       event.preventDefault();
       event.stopPropagation();
@@ -210,7 +210,7 @@ MouseGestureObserver.prototype = {
     debug(this._window, "click", event);
     if (wantedContextMenu) {
       // This doesn't trigger our contextmenu handler below, so we don't need to
-      // worry about it being supressed.
+      // worry about it being suppressed.
       event.target.dispatchEvent(new this._window.MouseEvent(
         "contextmenu", event
       ));
@@ -225,12 +225,15 @@ MouseGestureObserver.prototype = {
    * @param event The event to handle
    */
   contextmenu: function(event) {
+    // In addition to the usual cases, ignore the context menu key on the
+    // keyboard; see <https://bugzilla.mozilla.org/show_bug.cgi?id=1322876> for
+    // more details.
     if (event.mozInputSource !== this._window.MouseEvent.MOZ_SOURCE_MOUSE ||
-        !event.isTrusted)
+        event.buttons === 0 || !event.isTrusted)
       return;
 
     if (this._performingGesture || this._delayContextMenu) {
-      debug(this._window, "suppressed contextmenu");
+      debug(this._window, "suppressed contextmenu", event);
       if (this._delayContextMenu)
         this._wantContextMenu = true;
 
