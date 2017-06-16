@@ -227,9 +227,11 @@ MouseGestureObserver.prototype = {
         // have their coordinates relative to the content, not the whole window,
         // even when the event listener is in a chrome context.
         let rect = target.getBoundingClientRect();
+        let modifiers = (event.altKey << 0 + event.ctrlKey << 1 +
+                         event.shiftKey << 2 + event.metaKey << 3);
         utils.sendMouseEvent(
           "contextmenu", event.x + rect.x, event.y + rect.y, event.button,
-          event.detail, 0
+          event.detail, modifiers
         );
       } else {
         debug(this._window, "synthesizing context menu (direct)");
