@@ -3,7 +3,7 @@ ADDON_VERSION=0.3pre
 
 .PHONY: clean
 clean:
-	git clean -X .
+	git clean -fX .
 
 .PHONY: package
 package: clean
