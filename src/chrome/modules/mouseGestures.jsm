@@ -73,6 +73,10 @@ MouseGestureObserver.prototype = {
   // until the corresponding click event.
   _wantContextMenu: false,
 
+  // True if we just forced a contextmenu event and don't want to delay it
+  // anymore!
+  _forceContextMenu: false,
+
   /**
    * Clean up the mouse gesture observer, detaching all event listeners.
    */
@@ -113,6 +117,7 @@ MouseGestureObserver.prototype = {
     if (this._performingGesture) {
       this._performingGesture = false;
       this._wantContextMenu = false;
+      this._forceContextMenu = false;
     }
   },
 
@@ -211,9 +216,27 @@ MouseGestureObserver.prototype = {
     if (wantedContextMenu) {
       // This doesn't trigger our contextmenu handler below, so we don't need to
       // worry about it being suppressed.
-      event.target.dispatchEvent(new this._window.MouseEvent(
-        "contextmenu", event
-      ));
+      let target = event.target;
+      if (target.id === 'content') {
+        debug(this._window, "synthesizing context menu (indirect)");
+        let utils = this._window.QueryInterface(Ci.nsIInterfaceRequestor)
+                                .getInterface(Ci.nsIDOMWindowUtils);
+        this._forceContextMenu = true;
+
+        // XXX: For some reason, click events (and only click events) on content
+        // have their coordinates relative to the content, not the whole window,
+        // even when the event listener is in a chrome context.
+        let rect = target.getBoundingClientRect();
+        utils.sendMouseEvent(
+          "contextmenu", event.x + rect.x, event.y + rect.y, event.button,
+          event.detail, 0
+        );
+      } else {
+        debug(this._window, "synthesizing context menu (direct)");
+        target.dispatchEvent(new this._window.MouseEvent(
+          "contextmenu", event
+        ));
+      }
     }
   },
 
@@ -231,6 +254,12 @@ MouseGestureObserver.prototype = {
     if (event.mozInputSource !== this._window.MouseEvent.MOZ_SOURCE_MOUSE ||
         event.buttons === 0 || !event.isTrusted)
       return;
+
+    if (this._forceContextMenu) {
+      debug(this._window, "forced contextmenu", event);
+      this._forceContextMenu = false;
+      return;
+    }
 
     if (this._performingGesture || this._delayContextMenu) {
       debug(this._window, "suppressed contextmenu", event);
