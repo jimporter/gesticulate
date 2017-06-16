@@ -6,7 +6,7 @@
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
     <em:name>Gesticulate</em:name>
-    <em:version>0.3pre</em:version>
+    <em:version>0.3a3</em:version>
     <em:creator>Jim Porter</em:creator>
     <em:contributor></em:contributor>
     <em:description>Perform common browsing commands via rocker gestures.</em:description>
