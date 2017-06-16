@@ -252,7 +252,7 @@ MouseGestureObserver.prototype = {
     // keyboard; see <https://bugzilla.mozilla.org/show_bug.cgi?id=1322876> for
     // more details.
     if (event.mozInputSource !== this._window.MouseEvent.MOZ_SOURCE_MOUSE ||
-        event.buttons === 0 || !event.isTrusted)
+        event.button === 0 || !event.isTrusted)
       return;
 
     if (this._forceContextMenu) {
