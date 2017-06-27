@@ -217,7 +217,7 @@ MouseGestureObserver.prototype = {
       // This doesn't trigger our contextmenu handler below, so we don't need to
       // worry about it being suppressed.
       let target = event.target;
-      if (target.id === 'content') {
+      if (target.id === "content") {
         debug(this._window, "synthesizing context menu (indirect)");
         let utils = this._window.QueryInterface(Ci.nsIInterfaceRequestor)
                                 .getInterface(Ci.nsIDOMWindowUtils);
