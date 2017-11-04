@@ -25,14 +25,14 @@ const Functions = {
    * Go to the previous tab, cycling around if we're at the beginning.
    */
   previousTab: function(window, event) {
-    browser.runtime.sendMessage({command: "cycleTab", offset: -1});
+    browser.runtime.sendMessage({type: "cycleTab", offset: -1});
   },
 
   /**
    * Go to the next tab, cycling around if we're at the end.
    */
   nextTab: function(window, event) {
-    browser.runtime.sendMessage({command: "cycleTab", offset: 1});
+    browser.runtime.sendMessage({type: "cycleTab", offset: 1});
   },
 
   /**

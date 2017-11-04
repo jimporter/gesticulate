@@ -25,12 +25,10 @@ function cycleTab(offset) {
   });
 }
 
-browser.runtime.onMessage.addListener((message) => {
-  switch (message.command) {
+browser.runtime.onMessage.addListener((message, sender) => {
+  switch (message.type) {
   case "cycleTab":
     cycleTab(message.offset);
     break;
-  default:
-    console.error("unknown command", message.command);
   }
 });

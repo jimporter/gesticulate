@@ -52,16 +52,48 @@ function MouseGestureObserver(window) {
     this._bound.set(i, bound);
     this._window.addEventListener(i, bound, true);
   }
+
+  // Synchronize internal mouse gesture state across tabs.
+  browser.runtime.onMessage.addListener((message) => {
+    switch (message.type) {
+    case "performingGesture":
+      this.__performingGesture = message.value;
+      break;
+    case "wantContextMenu":
+      this.__wantContextMenu = message.value;
+      break;
+    }
+  });
 }
 
 MouseGestureObserver.prototype = {
   // True if we're performing a gesture; this lets us know when to suppress
   // mouse events.
-  _performingGesture: false,
+  __performingGesture: false,
 
   // True if the browser tried to open a context menu and we want to delay it
   // until the corresponding click event.
-  _wantContextMenu: false,
+  __wantContextMenu: false,
+
+  get _performingGesture() {
+    return this.__performingGesture;
+  },
+
+  set _performingGesture(value) {
+    this.__performingGesture = value;
+    browser.runtime.sendMessage({type: "performingGesture", value});
+    return value;
+  },
+
+  get _wantContextMenu() {
+    return this.__wantContextMenu;
+  },
+
+  set _wantContextMenu(value) {
+    this.__wantContextMenu = value;
+    browser.runtime.sendMessage({type: "wantContextMenu", value});
+    return value;
+  },
 
   /**
    * Clean up the mouse gesture observer, detaching all event listeners.
