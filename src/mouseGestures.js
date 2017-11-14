@@ -53,6 +53,12 @@ function MouseGestureObserver(window) {
     this._window.addEventListener(i, bound, true);
   }
 
+  // Initialize internal mouse gesture state from current global state.
+  browser.runtime.sendMessage({type: "mouseState"}).then((mouseState) => {
+    this.__performingGesture = mouseState.performingGesture;
+    this.__wantContextMenu = mouseState.wantContextMenu;
+  });
+
   // Synchronize internal mouse gesture state across tabs.
   browser.runtime.onMessage.addListener((message) => {
     switch (message.type) {
