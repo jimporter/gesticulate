@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Gesticulate",
-  "version": "0.3pre",
+  "version": "0.3a6",
 
   "description": "Perform common browsing commands via rocker gestures.",
 
