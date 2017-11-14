@@ -20,6 +20,9 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "match_about_blank": true,
+      "all_frames": true,
+      "run_at": "document_start",
       "js": ["log.js", "functions.js", "gestures.js", "mouseGestures.js",
              "main.js"]
     }
