@@ -48,8 +48,8 @@ function MouseGestureObserver(window) {
     this._window = window;
 
     this._bound = new Map();
-    for (var i of ["mousedown", "mouseup", "click", "contextmenu", "wheel"]) {
-      var bound = this[i].bind(this);
+    for (let i of ["mousedown", "mouseup", "click", "contextmenu", "wheel"]) {
+      let bound = this[i].bind(this);
       this._bound.set(i, bound);
       this._window.addEventListener(i, bound, true);
     }
@@ -100,7 +100,7 @@ MouseGestureObserver.prototype = {
    * Clean up the mouse gesture observer, detaching all event listeners.
    */
   cleanup: function() {
-    for (var [k, v] of this._bound.entries()) {
+    for (let [k, v] of this._bound.entries()) {
       this._window.removeEventListener(k, v, true);
     }
   },

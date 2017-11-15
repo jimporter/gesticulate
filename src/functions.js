@@ -45,8 +45,8 @@ const Functions = {
     if (img.tagName !== "IMG")
       return;
 
-    let width = parseFloat(img.width);
-    let height = parseFloat(img.height);
+    const width = parseFloat(img.width);
+    const height = parseFloat(img.height);
     img.width = width * factor;
     img.height = height * factor;
   },
