@@ -3,6 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 function debug(...args) {
-  // XXX: Add a pref for toggling debug logging.
-  console.log(...args);
+  if (prefs.getPref("debug"))
+    console.log(...args);
 }

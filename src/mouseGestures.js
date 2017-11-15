@@ -98,9 +98,7 @@ MouseGestureObserver.prototype = {
    * Get the button to use for mouse gestures.
    */
   get _gestureButton() {
-    // XXX: Support a pref for setting the gesture button (it used to be
-    // "extensions.gesticulate.gesture_button").
-    return 2;
+    return prefs.getPref("gesture_button");
   },
 
   /**
