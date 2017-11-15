@@ -56,7 +56,6 @@ function MouseGestureObserver(window) {
   // Initialize internal mouse gesture state from current global state.
   browser.runtime.sendMessage({type: "mouseState"}).then((mouseState) => {
     this.__performingGesture = mouseState.performingGesture;
-    this.__wantContextMenu = mouseState.wantContextMenu;
   });
 
   // Synchronize internal mouse gesture state across tabs.
@@ -64,9 +63,6 @@ function MouseGestureObserver(window) {
     switch (message.type) {
     case "performingGesture":
       this.__performingGesture = message.value;
-      break;
-    case "wantContextMenu":
-      this.__wantContextMenu = message.value;
       break;
     }
   });
@@ -77,10 +73,6 @@ MouseGestureObserver.prototype = {
   // mouse events.
   __performingGesture: false,
 
-  // True if the browser tried to open a context menu and we want to delay it
-  // until the corresponding click event.
-  __wantContextMenu: false,
-
   get _performingGesture() {
     return this.__performingGesture;
   },
@@ -88,16 +80,6 @@ MouseGestureObserver.prototype = {
   set _performingGesture(value) {
     this.__performingGesture = value;
     browser.runtime.sendMessage({type: "performingGesture", value});
-    return value;
-  },
-
-  get _wantContextMenu() {
-    return this.__wantContextMenu;
-  },
-
-  set _wantContextMenu(value) {
-    this.__wantContextMenu = value;
-    browser.runtime.sendMessage({type: "wantContextMenu", value});
     return value;
   },
 
@@ -111,40 +93,12 @@ MouseGestureObserver.prototype = {
   },
 
   /**
-   * Determine if the context menu's popup should be delayed. This is necessary
-   * on non-Windows platforms because it pops up on mousedown, which can
-   * visually interrupt a rocker gesture.
-   */
-  get _delayContextMenu() {
-    // XXX: Support a pref for delaying the context menu (it used to be
-    // "extensions.gesticulate.delay_context_menu". Also, don't delay on
-    // Windows; it already works fine there.
-    return false;
-  },
-
-  /**
    * Get the button to use for mouse gestures.
    */
   get _gestureButton() {
     // XXX: Support a pref for setting the gesture button (it used to be
     // "extensions.gesticulate.gesture_button").
     return 2;
-  },
-
-  /**
-   * Reset the internal state to the default if we were performing a gesture.
-   * This is necessary because Firefox swallows pending events during page
-   * unloads.
-   */
-  _resetState: function() {
-    // We only reset when we know we were already performing a gesture because
-    // recent Firefox builds on Linux fire the contextmenu event *before* the
-    // mousedown event. If we don't do this, we'll forget that we had a context
-    // menu queued up.
-    if (this._performingGesture) {
-      this._performingGesture = false;
-      this._wantContextMenu = false;
-    }
   },
 
   /**
@@ -168,9 +122,7 @@ MouseGestureObserver.prototype = {
           toButtons(event.button), event);
 
     if (oldState === 0) {
-      // Firefox swallows pending events during page unloads; make sure we're
-      // in the proper state if we exited the gesture.
-      this._resetState();
+      this._performingGesture = false;
     } else if (fromButtons(oldState) !== undefined) {
       event.target.dispatchEvent(new this._window.CustomEvent(
         "gesture", { detail: {
@@ -200,25 +152,14 @@ MouseGestureObserver.prototype = {
     debug(this._window, "mouseup", event);
 
     if (this._performingGesture) {
-      if (event.buttons === 0) {
-        // Delay exiting the gesture so that we can suppress the last click
-        // event generated from this mouseup.
-        this._window.setTimeout(() => {
-          debug(this._window, "gesture exited");
-          this._performingGesture = false;
-        }, 0);
-      }
-
       event.preventDefault();
       event.stopPropagation();
     }
   },
 
   /**
-   * Handle the click event. This is necessary for two reasons: 1) to suppress
-   * clicks that happened during a gesture, and 2) to synthesize a contextmenu
-   * event for Linux/OS X(?), since they pop up their context menus on
-   * mousedown, which disrupts the UI of rocker gestures.
+   * Handle the click event. This is necessary to suppress clicks that happened
+   * during a gesture.
    *
    * @param event The event to handle
    */
@@ -226,9 +167,6 @@ MouseGestureObserver.prototype = {
     if (event.mozInputSource !== MouseEvent.MOZ_SOURCE_MOUSE ||
         !event.isTrusted)
       return;
-
-    let wantedContextMenu = this._wantContextMenu;
-    this._wantContextMenu = false;
 
     if (this._performingGesture) {
       debug(this._window, "suppressed click");
@@ -239,21 +177,11 @@ MouseGestureObserver.prototype = {
     }
 
     debug(this._window, "click", event);
-    if (wantedContextMenu) {
-      // This doesn't trigger our contextmenu handler below, so we don't need to
-      // worry about it being supressed.
-      // XXX: This is currently broken due to multi-process. Figure out what to
-      // do here instead...
-      event.target.dispatchEvent(new this._window.MouseEvent(
-        "contextmenu", event
-      ));
-    }
   },
 
   /**
-   * Handle the contextmenu event. This is needed on Linux/OS X(?), since they
-   * pop up their context menus on mousedown, which disrupts the UI of rocker
-   * gestures.
+   * Handle the contextmenu event. This is necessary to suppress clicks that
+   * happened during a gesture.
    *
    * @param event The event to handle
    */
@@ -262,10 +190,8 @@ MouseGestureObserver.prototype = {
         !event.isTrusted)
       return;
 
-    if (this._performingGesture || this._delayContextMenu) {
+    if (this._performingGesture) {
       debug(this._window, "suppressed contextmenu");
-      if (this._delayContextMenu)
-        this._wantContextMenu = true;
 
       event.preventDefault();
       event.stopPropagation();
@@ -287,9 +213,7 @@ MouseGestureObserver.prototype = {
       return;
 
     if (event.buttons === 0) {
-      // Firefox swallows pending events during page unloads; make sure we're
-      // in the proper state if we exited the gesture.
-      this._resetState();
+      this._performingGesture = false;
     } else if (fromButtons(event.buttons) === this._gestureButton) {
       let dir = event.deltaY > 0 ? 1 : -1;
       event.target.dispatchEvent(new this._window.CustomEvent(

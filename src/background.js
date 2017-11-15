@@ -2,11 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const mouseState = {
-  performingGesture: false,
-  wantContextMenu: false,
-};
-
 /**
  * Cycle through the list of tabs in this window.
  *
@@ -30,6 +25,10 @@ function cycleTab(offset) {
   });
 }
 
+const mouseState = {
+  performingGesture: false,
+};
+
 browser.runtime.onMessage.addListener((message, sender, respond) => {
   switch (message.type) {
   case "cycleTab":
@@ -37,9 +36,6 @@ browser.runtime.onMessage.addListener((message, sender, respond) => {
     break;
   case "performingGesture":
     mouseState.performingGesture = message.value;
-    break;
-  case "wantContextMenu":
-    mouseState.wantContextMenu = message.value;
     break;
   case "mouseState":
     respond(mouseState);
