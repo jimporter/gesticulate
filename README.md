@@ -23,6 +23,6 @@ release versions of Firefox.
 This add-on is [licensed][license-link] under the Mozilla Public License,
 version 2.0.
 
-[download-image]: https://img.shields.io/badge/amo-0.2-orange.svg
+[download-image]: https://img.shields.io/badge/amo-0.3-orange.svg
 [download-link]: https://addons.mozilla.org/en-US/firefox/addon/gesticulate/
 [license-link]: https://github.com/jimporter/gesticulate/blob/master/LICENSE
