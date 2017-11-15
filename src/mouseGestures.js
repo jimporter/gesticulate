@@ -120,7 +120,7 @@ MouseGestureObserver.prototype = {
 
     let buttons = event.buttons;
     let oldState = buttons - toButtons(event.button);
-    debug(this._window, "mousedown", oldState, event.buttons, buttons,
+    debug("mousedown", oldState, event.buttons, buttons,
           toButtons(event.button), event);
 
     if (oldState === 0) {
@@ -151,7 +151,7 @@ MouseGestureObserver.prototype = {
     if (!event.isTrusted)
       return;
 
-    debug(this._window, "mouseup", event);
+    debug("mouseup", event);
 
     if (this._performingGesture) {
       event.preventDefault();
@@ -171,14 +171,14 @@ MouseGestureObserver.prototype = {
       return;
 
     if (this._performingGesture) {
-      debug(this._window, "suppressed click");
+      debug("suppressed click");
 
       event.preventDefault();
       event.stopPropagation();
       return;
     }
 
-    debug(this._window, "click", event);
+    debug("click", event);
   },
 
   /**
@@ -193,14 +193,14 @@ MouseGestureObserver.prototype = {
       return;
 
     if (this._performingGesture) {
-      debug(this._window, "suppressed contextmenu");
+      debug("suppressed contextmenu");
 
       event.preventDefault();
       event.stopPropagation();
       return;
     }
 
-    debug(this._window, "contextmenu", event);
+    debug("contextmenu", event);
   },
 
   /**
@@ -232,6 +232,6 @@ MouseGestureObserver.prototype = {
       return;
     }
 
-    debug(this._window, "wheel", event);
+    debug("wheel", event);
   },
 };

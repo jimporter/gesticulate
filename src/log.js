@@ -2,15 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function debug(window, ...args) {
+function debug(...args) {
   // XXX: Add a pref for toggling debug logging.
-  window.console.log(...args);
-}
-
-function warn(window, ...args) {
-  window.console.warn(...args);
-}
-
-function error(window, ...args) {
-  window.console.error(...args);
+  console.log(...args);
 }

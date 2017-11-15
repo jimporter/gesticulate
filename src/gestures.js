@@ -41,7 +41,7 @@ GestureHandler.prototype = {
    * @param event The event to handle
    */
   handleEvent: function(event) {
-    debug(this._window, "*** GESTURE %s ***", event.detail.id);
+    debug("*** GESTURE %s ***", event.detail.id);
 
     if (event.detail.id in this._gestures)
       this._gestures[event.detail.id](this._window, event);
