@@ -70,7 +70,9 @@ function MouseGestureObserver(window) {
 
 MouseGestureObserver.prototype = {
   // True if we're performing a gesture; this lets us know when to suppress
-  // mouse events.
+  // mouse events. Note: this remains true until the next time a non-gesture
+  // mousedown event occurs (i.e. when there were no other mouse buttons already
+  // pressed).
   __performingGesture: false,
 
   get _performingGesture() {
