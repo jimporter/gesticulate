@@ -44,42 +44,53 @@ function toButtons(x) {
  * @param window The window to observe gestures for
  */
 function MouseGestureObserver(window) {
-  this._window = window;
+  try {
+    this._window = window;
 
-  this._bound = new Map();
-  for (var i of ["mousedown", "mouseup", "click", "contextmenu", "wheel"]) {
-    var bound = this[i].bind(this);
-    this._bound.set(i, bound);
-    this._window.addEventListener(i, bound, true);
-  }
-
-  // Initialize internal mouse gesture state from current global state.
-  browser.runtime.sendMessage({type: "mouseState"}).then((mouseState) => {
-    this.__performingGesture = mouseState.performingGesture;
-  });
-
-  // Synchronize internal mouse gesture state across tabs.
-  browser.runtime.onMessage.addListener((message) => {
-    switch (message.type) {
-    case "performingGesture":
-      this.__performingGesture = message.value;
-      break;
+    this._bound = new Map();
+    for (var i of ["mousedown", "mouseup", "click", "contextmenu", "wheel"]) {
+      var bound = this[i].bind(this);
+      this._bound.set(i, bound);
+      this._window.addEventListener(i, bound, true);
     }
-  });
+
+    // Initialize internal mouse gesture state from current global state.
+    browser.runtime.sendMessage({type: "mouseState"}).then((mouseState) => {
+      debug("initialized mouse gesture state", mouseState.performingGesture,
+            this._window);
+      this.__performingGesture = mouseState.performingGesture;
+    });
+
+    // Synchronize internal mouse gesture state across tabs.
+    this._messagePort = browser.runtime.connect();
+    this._messagePort.onMessage.addListener((message) => {
+      switch (message.type) {
+      case "performingGesture":
+        debug("updated mouse gesture state", message.value, this._window);
+        this.__performingGesture = message.value;
+        break;
+      }
+    });
+  } catch (e) {
+    console.error("Error initializing mouse gesture observer", e);
+  }
 }
 
 MouseGestureObserver.prototype = {
   // True if we're performing a gesture; this lets us know when to suppress
   // mouse events. Note: this remains true until the next time a non-gesture
   // mousedown event occurs (i.e. when there were no other mouse buttons already
-  // pressed).
-  __performingGesture: false,
+  // pressed). We also start this at true to suppress any click events that
+  // happen before we're able to fetch the global gesture state. Hopefully this
+  // doesn't break things for anyone...
+  __performingGesture: true,
 
   get _performingGesture() {
     return this.__performingGesture;
   },
 
   set _performingGesture(value) {
+    debug("synchronizing performingGesture", value);
     this.__performingGesture = value;
     browser.runtime.sendMessage({type: "performingGesture", value});
     return value;

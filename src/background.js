@@ -29,13 +29,30 @@ const mouseState = {
   performingGesture: false,
 };
 
+const ports = new Set();
+
+function broadcast(message, excludedSender) {
+  for (let p of ports) {
+    if (!excludedSender || p.sender.contextId !== excludedSender.contextId) {
+      p.postMessage(message);
+    }
+  }
+}
+
+browser.runtime.onConnect.addListener((port) => {
+  ports.add(port);
+  port.onDisconnect.addListener(() => ports.delete(port));
+});
+
 browser.runtime.onMessage.addListener((message, sender, respond) => {
+  console.log("received message", message, sender);
   switch (message.type) {
   case "cycleTab":
     cycleTab(message.offset);
     break;
   case "performingGesture":
     mouseState.performingGesture = message.value;
+    broadcast(message, sender);
     break;
   case "mouseState":
     respond(mouseState);
