@@ -1,5 +1,5 @@
 ADDON_NAME=gesticulate
-ADDON_VERSION=0.3
+ADDON_VERSION=0.4pre
 
 .PHONY: clean
 clean:
