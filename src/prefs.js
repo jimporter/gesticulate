@@ -2,12 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function write(text) {
-  var x = document.createElement("span");
-  x.textContent = text;
-  document.getElementsByTagName("label")[0].appendChild(x);
-}
-
 function Preferences(prefs) {
   this._defaultPrefs = prefs;
   this._prefs = {};
