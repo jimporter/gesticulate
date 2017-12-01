@@ -6,6 +6,13 @@
 (currently only rocker gestures). If you're simply looking to install the
 add-on, you should look on [AMO][download-link] instead.
 
+## Help! This doesn't work on Mac or Linux!
+
+First, make sure you have Firefox 58 or greater. Then go to `about:config` and
+set `ui.context_menus.after_mouseup` to true. This will ensure that when you
+start a gesture with RMB, you'll be able to complete the gesture instead of
+being interrupted by the context menu.
+
 ## Building
 
 If you'd like to build the .xpi from the latest master, simply run the
